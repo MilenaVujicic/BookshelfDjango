@@ -11,10 +11,10 @@ class Book(models.Model):
     isbn = models.CharField(max_length=13)
     status = models.TextChoices("READ", "TO BE READ")
     lent = models.BooleanField(default=False)
-    publisher = models.OneToOneField(Publisher, on_delete=models.CASCADE, primary_key=True)
+    publisher = models.OneToOneField(Publisher, on_delete=models.CASCADE, primary_key=True, null=False)
     authors = models.ManyToManyField(Author)
-    reviews = models.ForeignKey(Review, on_delete=models.CASCADE)
-    cover = models.ImageField(upload_to='covers')
-    calendars = models.ForeignKey(BookCalendar, on_delete=models.CASCADE)
+    reviews = models.ForeignKey(Review, on_delete=models.CASCADE, null=True)
+    cover = models.ImageField(upload_to='covers', null=True)
+    calendars = models.ForeignKey(BookCalendar, on_delete=models.CASCADE, null=True)
 
 
