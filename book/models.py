@@ -1,6 +1,6 @@
 from django.db import models
 from publisher.models import Publisher
-from author.models import  Author
+from author.models import Author
 
 
 class Book(models.Model):
