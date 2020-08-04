@@ -1,3 +1,10 @@
 from django.db import models
 
-# Create your models here.
+
+class Author(models.Model):
+    name = models.CharField(blank=True, null=True, max_length=512)
+    surname = models.TextField(blank=False, null=False, max_length=512)
+
+    def __str__(self):
+        return self.name
+
