@@ -4,6 +4,7 @@ from author.models import Author
 from review.models import Review
 from book_calendar.models import BookCalendar
 
+
 class Book(models.Model):
     title = models.CharField(blank=False, null=False, max_length=512)
     pages = models.PositiveSmallIntegerField(default=1)
