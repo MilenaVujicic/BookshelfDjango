@@ -1,5 +1,4 @@
 from django.db import models
-from publisher.models import Publisher
 from author.models import Author
 from review.models import Review
 from book_calendar.models import BookCalendar
@@ -12,10 +11,9 @@ class Book(models.Model):
     isbn = models.CharField(max_length=13)
     status = models.TextChoices("READ", "TO BE READ")
     lent = models.BooleanField(default=False)
-    publisher = models.OneToOneField(Publisher, on_delete=models.CASCADE, primary_key=True, null=False)
-    authors = models.ManyToManyField(Author)
-    reviews = models.ForeignKey(Review, on_delete=models.CASCADE, null=True)
-    cover = models.ImageField(upload_to='covers', null=True)
-    calendars = models.ForeignKey(BookCalendar, on_delete=models.CASCADE, null=True)
+    authors = models.ManyToManyField(Author, related_name='books', blank=True, null=True)
+    reviews = models.ForeignKey(Review, on_delete=models.CASCADE, blank=True, null=True)
+    cover = models.ImageField(upload_to='covers', blank=True, null=True)
+    calendars = models.ForeignKey(BookCalendar, on_delete=models.CASCADE, null=True, blank=True)
 
 

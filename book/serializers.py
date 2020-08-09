@@ -9,3 +9,10 @@ class BookSerializer(serializers.ModelSerializer):
     class Meta:
         model = Book
         field = ('id', 'title', 'pages', 'description', 'isbn', 'status', 'lent', 'authors')
+
+
+class BookSerializerBasic(serializers.ModelSerializer):
+    class Meta:
+        model = Book
+        field = ('id', 'title', 'pages', 'description', 'isbn', 'status', 'lent')
+
