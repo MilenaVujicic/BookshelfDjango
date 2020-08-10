@@ -4,10 +4,10 @@ from django.http import HttpResponse
 from django.http import JsonResponse
 from .models import Author
 from .serializers import AuthorSerializerBasic
+from django.views.decorators.csrf import csrf_exempt
 
 
-# Create your views here.
-
+@csrf_exempt
 def author_list(request):
     if request.method == 'GET':
         authors = Author.objects.all()
