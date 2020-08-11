@@ -15,7 +15,7 @@ Including another URLconf
 """
 from django.contrib import admin
 from django.urls import path
-from author.views import author_list
+from author.views import author_list, author_entity
 from book.views import book_list
 from book_calendar.views import book_calendar_list
 from publisher.views import publisher_list
@@ -23,6 +23,7 @@ from review.views import review_list
 
 urlpatterns = [
     path('author/', author_list),
+    path('author/<int:id>/', author_entity),
     path('book/', book_list),
     path('book_calendar/', book_calendar_list),
     path('publisher/', publisher_list),
