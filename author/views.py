@@ -34,7 +34,7 @@ def author_entity(request, id):
         return HttpResponse(status=200)
     elif request.method == 'PUT':
         data = JSONParser().parse(request)
-        serializer = AuthorSerializerBasic(data=data)
+        serializer = AuthorSerializerBasic(author, data=data)
         if serializer.is_valid():
             serializer.save()
             return JsonResponse(serializer.data, status=200)
