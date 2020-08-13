@@ -8,10 +8,10 @@ class PublisherSerializer(serializers.ModelSerializer):
 
     class Meta:
         model = Publisher
-        field = ('id', 'name', 'book_set')
+        fields = ('id', 'name', 'book_set')
 
 
 class PublisherSerializerBasic(serializers.ModelSerializer):
     class Meta:
         model = Publisher
-        field = ('id', 'name')
+        fields = ('id', 'name')
