@@ -20,6 +20,8 @@ from book.views import book_list, book_entity
 from book_calendar.views import book_calendar_list
 from publisher.views import publisher_list, publisher_entity
 from review.views import review_list, review_entity
+from app_user.views import user_list
+from rest_framework_jwt.views import obtain_jwt_token, refresh_jwt_token
 
 urlpatterns = [
     path('author/', author_list),
@@ -31,7 +33,12 @@ urlpatterns = [
     path('publisher/<int:id>/', publisher_entity),
     path('review/', review_list),
     path('review/<int:id>/', review_entity),
+    path('user/', user_list),
+    path('user/login/', obtain_jwt_token),
+    path('user/refresh_jwt/', refresh_jwt_token),
     path('admin/', admin.site.urls),
 
-    path('accounts/', include('django.contrib.auth.urls'))
+    path('accounts/', include('django.contrib.auth.urls')),
+
+
 ]
