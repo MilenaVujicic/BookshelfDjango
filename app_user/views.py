@@ -21,3 +21,26 @@ def user_list(request):
         if serializer.is_valid():
             serializer.save()
             return JsonResponse(serializer.data, status=200)
+
+
+@csrf_exempt
+def user_entity(request, username):
+    try:
+        user = AppUser.objects.get(username=username)
+    except AppUser.DoesNotExist:
+        return HttpResponse(status=404)
+
+    if request.method == 'DELETE':
+        user.delete()
+        return HttpResponse(status=200)
+    elif request.method == 'PUT':
+        data = JSONParser().parse(request)
+        serializer = UserSerializer(user, data=data)
+        if serializer.is_valid():
+            serializer.save()
+            return JsonResponse(serializer.data, status=200)
+        return JsonResponse(serializer.errors, status=400)
+    elif request.method == 'GET':
+        serializer = UserSerializer(user)
+        return JsonResponse(serializer.data, status=200)
+

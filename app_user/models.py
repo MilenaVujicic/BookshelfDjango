@@ -27,9 +27,9 @@ class MyAppUserManager(BaseUserManager):
         if password is None:
             raise TypeError("Password cannot be empty")
 
-        user = self.create_user(username=username, email=self.normalize_email(email), password=password
-                                , first_name=first_name,
-                                last_name=last_name)
+        user = self.create_user(username=username, email=self.normalize_email(email), first_name=first_name,
+                                last_name=last_name, password = password)
+        user.set_password(password)
         user.is_superuser = True
         user.is_admin = True
         user.is_staff = True

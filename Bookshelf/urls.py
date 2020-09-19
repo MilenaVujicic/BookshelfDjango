@@ -15,17 +15,18 @@ Including another URLconf
 """
 from django.contrib import admin
 from django.urls import path, include
-from author.views import author_list, author_entity
+from author.views import author_list, author_entity, author_add
 from book.views import book_list, book_entity
 from book_calendar.views import book_calendar_list
 from publisher.views import publisher_list, publisher_entity
 from review.views import review_list, review_entity
-from app_user.views import user_list
+from app_user.views import user_list, user_entity
 from rest_framework_jwt.views import obtain_jwt_token, refresh_jwt_token
 
 urlpatterns = [
     path('author/', author_list),
-    path('author/<int:id>/', author_entity),
+    path('author/<str:username>/', author_add),
+    path('author/<int:id>/<str:username>', author_entity),
     path('book/', book_list),
     path('book/<int:id>/', book_entity),
     path('book_calendar/', book_calendar_list),
@@ -36,8 +37,8 @@ urlpatterns = [
     path('user/', user_list),
     path('user/login/', obtain_jwt_token),
     path('user/refresh_jwt/', refresh_jwt_token),
+    path('user/<str:username>/', user_entity),
     path('admin/', admin.site.urls),
-
     path('accounts/', include('django.contrib.auth.urls')),
 
 
