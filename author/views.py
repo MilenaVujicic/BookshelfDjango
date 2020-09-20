@@ -24,7 +24,7 @@ def author_list(request):
 
 
 @csrf_exempt
-def author_add(request, username):
+def author_owner(request, username):
     if request.method == 'POST':
         data = JSONParser().parse(request)
         try:
@@ -35,17 +35,25 @@ def author_add(request, username):
         serializer = AuthorSerializer(data=data)
         if serializer.is_valid():
             model = serializer.save()
+            return JsonResponse(data, status=201)
+    elif request.method == 'GET':
+        try:
+            user = AppUser.objects.get(username=username)
+        except AppUser.DoesNotExist:
+            return HttpResponse(status=404)
+        id = user.id
+        authors = Author.objects.filter(owner=id)
+        serializer = AuthorSerializer(authors, many=True)
+        return JsonResponse(serializer.data, safe=False, status=200)
 
-    return JsonResponse(data, status=200)
 
 
 @csrf_exempt
-def author_entity(request, id):
+def author_entity(request, id, username):
     try:
         author = Author.objects.get(id=id)
     except Author.DoesNotExist:
         return HttpResponse(status=404)
-
     if request.method == 'DELETE':
         author.delete()
         return HttpResponse(status=200)

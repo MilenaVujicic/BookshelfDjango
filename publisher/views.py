@@ -3,8 +3,9 @@ from rest_framework.parsers import JSONParser
 from django.http import HttpResponse
 from django.http import JsonResponse
 from .models import Publisher
-from .serializers import PublisherSerializerBasic
+from .serializers import PublisherSerializerBasic, PublisherSerializer
 from django.views.decorators.csrf import csrf_exempt
+from app_user.models import AppUser
 
 
 @csrf_exempt
@@ -22,7 +23,27 @@ def publisher_list(request):
 
 
 @csrf_exempt
-def publisher_entity(request, id):
+def publisher_owner(request, username):
+    try:
+        user = AppUser.objects.get(username=username)
+    except AppUser.DoesNotExist:
+        return HttpResponse(status=404)
+    if request.method == 'POST':
+        data = JSONParser().parse(request)
+        data['owner'] = user.id
+        serializer = PublisherSerializer(data=data)
+        if serializer.is_valid():
+            model = serializer.save()
+            return JsonResponse(data, status=201)
+    elif request.method == 'GET':
+        id = user.id
+        publishers = Publisher.objects.filter(owner=id)
+        serializer = PublisherSerializer(publishers, many=True)
+        return JsonResponse(serializer.data, safe=False, status=200)
+
+
+@csrf_exempt
+def publisher_entity(request, id, username):
     try:
         publisher = Publisher.objects.get(id=id)
     except Publisher.DoesNotExist:
