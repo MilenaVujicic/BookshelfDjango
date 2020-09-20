@@ -1,8 +1,8 @@
 from django.db import models
-from book.models import Book
+from django.conf import settings
 
 
 class Publisher(models.Model):
     name = models.CharField(null=False, blank=False, max_length=512)
-    books = models.ForeignKey(Book, on_delete=models.CASCADE, blank=True, null=True)
+    owner = models.ForeignKey(settings.AUTH_USER_MODEL, on_delete=models.CASCADE)
 
