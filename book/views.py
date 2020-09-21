@@ -3,43 +3,81 @@ from rest_framework.parsers import JSONParser
 from django.http import HttpResponse
 from django.http import JsonResponse
 from .models import Book
-from .serializers import BookSerializerBasic
+from .serializers import BookSerializer
 from django.views.decorators.csrf import csrf_exempt
+from app_user.models import AppUser
+from publisher.models import Publisher
+import base64
+from author.models import Author
+from shelf.models import Shelf
 # Create your views here.
 
 
 @csrf_exempt
-def book_list(request):
+def books(request, username):
+    try:
+        user = AppUser.objects.get(username=username)
+    except AppUser.DoesNotExist:
+        return HttpResponse(status=404)
+
     if request.method == 'GET':
-        books = Book.objects.all()
-        serializer = BookSerializerBasic(books, many=True)
-        return JsonResponse(serializer.data, safe=False)
-    elif request.method == 'POST':
-        data = JSONParser().parse(request)
-        serializer = BookSerializerBasic(data=data)
-        if serializer.is_valid():
-            serializer.save()
-            return JsonResponse(serializer.data, status=200)
+        user_books = Book.objects.filter(owner=user.id)
+        serializer = BookSerializer(user_books, many=True)
+        return JsonResponse(serializer.data, safe=False, status=200)
 
 
 @csrf_exempt
-def book_entity(request, id):
+def new_book(request, username, publisher):
+    if request.method == 'POST':
+        try:
+            user = AppUser.objects.get(username=username)
+        except AppUser.DoesNotExist:
+            return HttpResponse(status=404)
+
+        data = JSONParser().parse(request)
+        data['owner'] = user.id
+        data['publisher'] = publisher
+        serializer = BookSerializer(data=data)
+        if serializer.is_valid():
+            serializer.save()
+            return JsonResponse(serializer.data,status=201)
+        return JsonResponse(serializer.errors, status=400)
+
+
+@csrf_exempt
+def book_entity(request, book_id):
     try:
-        book = Book.objects.get(id=id)
+        book = Book.objects.get(id=book_id)
     except Book.DoesNotExist:
         return HttpResponse(status=404)
-
     if request.method == 'DELETE':
         book.delete()
         return HttpResponse(status=200)
-    elif request.method == 'PUT':
-        data = JSONParser().parse(request)
-        serializer = BookSerializerBasic(book, data=data)
-        if serializer.is_valid():
-            serializer.save()
-            return JsonResponse(serializer.data, status=200)
-        return JsonResponse(serializer.errors, status=400)
-    elif request.method == 'GET':
-        serializer = BookSerializerBasic(book)
-        return JsonResponse(serializer.data, status=200)
 
+
+@csrf_exempt
+def book_author(request, bid):
+    if request.method == 'POST':
+        data = JSONParser().parse(request)
+        try:
+            book = Book.objects.get(id=bid)
+        except Book.DoesNotExist:
+            return HttpResponse(status=404)
+        for author_id in data:
+            book.authors.add(author_id)
+
+        return HttpResponse(status=200)
+
+
+@csrf_exempt
+def book_shelf(request, bid):
+    if request.method == 'POST':
+        data = JSONParser().parse(request)
+        try:
+            book = Book.objects.get(id=bid)
+        except Book.DoesNotExist:
+            return HttpResponse(status=404)
+        for shelf_id in data:
+            book.shelves.add(shelf_id)
+
+        return HttpResponse(status=200)

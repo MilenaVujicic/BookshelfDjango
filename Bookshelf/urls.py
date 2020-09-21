@@ -16,7 +16,7 @@ Including another URLconf
 from django.contrib import admin
 from django.urls import path, include
 from author.views import author_list, author_entity, author_owner
-from book.views import book_list, book_entity
+from book.views import new_book, book_entity, book_author, book_shelf, books
 from book_calendar.views import book_calendar_list
 from publisher.views import publisher_list, publisher_entity, publisher_owner
 from review.views import review_list, review_entity
@@ -28,8 +28,11 @@ urlpatterns = [
     path('author/', author_list),
     path('author/<str:username>/', author_owner),
     path('author/<int:id>/<str:username>/', author_entity),
-    path('book/', book_list),
-    path('book/<int:id>/', book_entity),
+    path('books/<str:username>/', books),
+    path('book/<int:book_id>/', book_entity),
+    path('book/<str:username>/<int:publisher>/', new_book),
+    path('book_author/<int:bid>/', book_author),
+    path('book_shelf/<int:bid>/', book_shelf),
     path('book_calendar/', book_calendar_list),
     path('publisher/', publisher_list),
     path('publisher/<str:username>/', publisher_owner),
