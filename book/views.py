@@ -9,6 +9,7 @@ from app_user.models import AppUser
 from publisher.models import Publisher
 import base64
 from author.models import Author
+from author.serializers import AuthorSerializerBasic
 from shelf.models import Shelf
 # Create your views here.
 
@@ -67,6 +68,11 @@ def book_author(request, bid):
             book.authors.add(author_id)
 
         return HttpResponse(status=200)
+    elif request.method == 'GET':
+        books = bid
+        authors = Author.objects.filter(books=books)
+        serializer = AuthorSerializerBasic(authors, many = True)
+        return JsonResponse(serializer.data, safe=False, status=200)
 
 
 @csrf_exempt
@@ -81,3 +87,23 @@ def book_shelf(request, bid):
             book.shelves.add(shelf_id)
 
         return HttpResponse(status=200)
+
+
+@csrf_exempt
+def shelf_book(request, username, sid):
+    if request.method == 'GET':
+        books = Book.objects.filter(shelves=sid)
+
+        serializer = BookSerializer(books, many=True)
+        return JsonResponse(serializer.data, safe=False, status=200)
+
+
+
+@csrf_exempt
+def all_books(request):
+    if request.method == 'GET':
+        books = Book.objects.filter(private=False)
+
+        serializer = BookSerializer(books, many=True)
+        return JsonResponse(serializer.data, safe=False, status=200)
+

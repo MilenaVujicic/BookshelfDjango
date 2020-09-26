@@ -16,10 +16,10 @@ Including another URLconf
 from django.contrib import admin
 from django.urls import path, include
 from author.views import author_list, author_entity, author_owner
-from book.views import new_book, book_entity, book_author, book_shelf, books
+from book.views import new_book, book_entity, book_author, book_shelf, books, shelf_book, all_books
 from book_calendar.views import book_calendar_list
 from publisher.views import publisher_list, publisher_entity, publisher_owner
-from review.views import review_list, review_entity
+from review.views import review_owner, review_entity
 from app_user.views import user_list, user_entity
 from shelf.views import shelf_list, shelf_entity, shelf_owner
 from rest_framework_jwt.views import obtain_jwt_token, refresh_jwt_token
@@ -33,12 +33,14 @@ urlpatterns = [
     path('book/<str:username>/<int:publisher>/', new_book),
     path('book_author/<int:bid>/', book_author),
     path('book_shelf/<int:bid>/', book_shelf),
+    path('books/', all_books),
+    path('shelf_book/<str:username>/<int:sid>/', shelf_book),
     path('book_calendar/', book_calendar_list),
     path('publisher/', publisher_list),
     path('publisher/<str:username>/', publisher_owner),
     path('publisher/<int:id>/<str:username>/', publisher_entity),
-    path('review/', review_list),
-    path('review/<int:id>/', review_entity),
+    path('review/<str:username>/<int:book>/', review_owner),
+    path('review/<int:review>/', review_entity),
     path('shelf/', shelf_list),
     path('shelf/<str:username>/', shelf_owner),
     path('shelf/<int:id>/<str:username>/', shelf_entity),
