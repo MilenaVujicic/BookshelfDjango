@@ -1,5 +1,6 @@
 from django.db import models
 from django.contrib.auth.models import AbstractBaseUser, BaseUserManager
+from django.contrib.auth.hashers import make_password, check_password
 # Create your models here.
 
 
@@ -14,7 +15,8 @@ class MyAppUserManager(BaseUserManager):
 
         user = self.model(username=username, first_name=first_name, last_name=last_name,
                           email=self.normalize_email(email))
-        user.set_password(password)
+
+        user.set_password(make_password(password))
         user.save(using=self._db)
 
         return user

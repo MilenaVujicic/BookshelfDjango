@@ -23,6 +23,7 @@ from review.views import review_owner, review_entity
 from app_user.views import user_list, user_entity
 from shelf.views import shelf_list, shelf_entity, shelf_owner
 from rest_framework_jwt.views import obtain_jwt_token, refresh_jwt_token
+from app_user.views import user_username
 
 urlpatterns = [
     path('author/', author_list),
@@ -45,7 +46,8 @@ urlpatterns = [
     path('shelf/<str:username>/', shelf_owner),
     path('shelf/<int:id>/<str:username>/', shelf_entity),
     path('user/', user_list),
-    path('user/login/', obtain_jwt_token),
+    path('user/log/', obtain_jwt_token),
+    path('user/login/', user_username),
     path('user/refresh_jwt/', refresh_jwt_token),
     path('user/<str:username>/', user_entity),
     path('admin/', admin.site.urls),
