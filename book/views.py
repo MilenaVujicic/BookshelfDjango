@@ -3,7 +3,7 @@ from rest_framework.parsers import JSONParser
 from django.http import HttpResponse
 from django.http import JsonResponse
 from .models import Book
-from .serializers import BookSerializer
+from .serializers import BookSerializer, BookSerializerAll
 from django.views.decorators.csrf import csrf_exempt
 from app_user.models import AppUser
 from publisher.models import Publisher
@@ -12,6 +12,8 @@ from author.models import Author
 from author.serializers import AuthorSerializerBasic
 from shelf.models import Shelf
 from shelf.serializers import ShelfSerializerBasic
+import base64
+from django.core.files.base import ContentFile
 # Create your views here.
 
 
@@ -50,14 +52,20 @@ def new_book(request, username, publisher):
         data['owner'] = user.id
         data['publisher'] = publisher
         book = Book.objects.get(id=data['id'])
+
         book.title = data['title']
+
         book.pages = data['pages']
         book.description = data['description']
         book.isbn = data['isbn']
         book.read = data['read']
         book.lent = data['lent']
+
         if data['cover'] != '':
-            book.cover = data['cover']
+            format, imgstr = data['cover'].split(';base64,')
+            ext = format.split('/')[-1]
+            name = username+str(book.id)+'.'+ext
+            book.cover = ContentFile(base64.b64decode(imgstr), name=name)
 
         book.private = data['private']
         book.publisher_id = publisher

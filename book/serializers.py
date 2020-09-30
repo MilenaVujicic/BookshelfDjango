@@ -25,3 +25,13 @@ class BookSerializerAll(serializers.ModelSerializer):
         model = Book
         fields = '__all__'
 
+
+class BookSerializerAllNoCover(serializers.ModelSerializer):
+    authors = AuthorSerializerBasic(read_only=True, many=True)
+    publisher = PublisherSerializerBasic(read_only=True)
+    shelves = ShelfSerializerBasic(read_only=True, many=True)
+
+    class Meta:
+        model = Book
+        exclude = ('cover',)
+
