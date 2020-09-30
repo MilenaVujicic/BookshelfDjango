@@ -1,18 +1,37 @@
 from rest_framework import serializers
 from .models import Book
-from author.models import Author
+from author.serializers import AuthorSerializerBasic
+from publisher.serializers import PublisherSerializerBasic
+from shelf.serializers import ShelfSerializerBasic
+from drf_extra_fields.fields import Base64ImageField
 
 
 class BookSerializer(serializers.ModelSerializer):
-    authors = serializers.PrimaryKeyRelatedField(queryset=Author.objects.all(), many=True)
+    cover = Base64ImageField()
 
     class Meta:
         model = Book
-        field = ('id', 'title', 'pages', 'description', 'isbn', 'status', 'lent', 'authors')
+        fields = ['id', 'title', 'pages', 'description', 'isbn', 'read', 'lent',
+                  'cover', 'private', 'publisher', 'owner']
 
 
-class BookSerializerBasic(serializers.ModelSerializer):
+class BookSerializerAll(serializers.ModelSerializer):
+    cover = Base64ImageField()
+    authors = AuthorSerializerBasic(read_only=True, many=True)
+    publisher = PublisherSerializerBasic(read_only=True)
+    shelves = ShelfSerializerBasic(read_only=True, many=True)
+
     class Meta:
         model = Book
-        field = ('id', 'title', 'pages', 'description', 'isbn', 'status', 'lent')
+        fields = '__all__'
+
+
+class BookSerializerAllNoCover(serializers.ModelSerializer):
+    authors = AuthorSerializerBasic(read_only=True, many=True)
+    publisher = PublisherSerializerBasic(read_only=True)
+    shelves = ShelfSerializerBasic(read_only=True, many=True)
+
+    class Meta:
+        model = Book
+        exclude = ('cover',)
 
