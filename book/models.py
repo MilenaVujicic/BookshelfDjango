@@ -18,4 +18,5 @@ class Book(models.Model):
     owner = models.ForeignKey(settings.AUTH_USER_MODEL, on_delete=models.CASCADE)
     authors = models.ManyToManyField(Author, related_name='books')
     shelves = models.ManyToManyField(Shelf)
+    lent_to = models.ForeignKey(settings.AUTH_USER_MODEL, on_delete=models.SET_NULL, related_name='lent_books', null=True)
 

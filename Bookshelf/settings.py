@@ -50,7 +50,6 @@ INSTALLED_APPS = [
     'shelf',
     'review',
     'app_user',
-    'book_calendar'
 ]
 
 MIDDLEWARE = [

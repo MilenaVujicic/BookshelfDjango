@@ -11,6 +11,7 @@ import base64
 from author.models import Author
 from author.serializers import AuthorSerializerBasic
 from shelf.models import Shelf
+from shelf.serializers import ShelfSerializerBasic
 # Create your views here.
 
 
@@ -29,11 +30,12 @@ def books(request, username):
 
 @csrf_exempt
 def new_book(request, username, publisher):
+    try:
+        user = AppUser.objects.get(username=username)
+    except AppUser.DoesNotExist:
+        return HttpResponse(status=404)
+
     if request.method == 'POST':
-        try:
-            user = AppUser.objects.get(username=username)
-        except AppUser.DoesNotExist:
-            return HttpResponse(status=404)
 
         data = JSONParser().parse(request)
         data['owner'] = user.id
@@ -43,6 +45,25 @@ def new_book(request, username, publisher):
             serializer.save()
             return JsonResponse(serializer.data,status=201)
         return JsonResponse(serializer.errors, status=400)
+    elif request.method == 'PUT':
+        data = JSONParser().parse(request)
+        data['owner'] = user.id
+        data['publisher'] = publisher
+        book = Book.objects.get(id=data['id'])
+        book.title = data['title']
+        book.pages = data['pages']
+        book.description = data['description']
+        book.isbn = data['isbn']
+        book.read = data['read']
+        book.lent = data['lent']
+        if data['cover'] != '':
+            book.cover = data['cover']
+
+        book.private = data['private']
+        book.publisher_id = publisher
+        book.save()
+        serializer = BookSerializer(book)
+        return JsonResponse(serializer.data, status=201)
 
 
 @csrf_exempt
@@ -54,6 +75,9 @@ def book_entity(request, book_id):
     if request.method == 'DELETE':
         book.delete()
         return HttpResponse(status=200)
+    elif request.method == 'GET':
+        serializer = BookSerializer(book)
+        return JsonResponse(serializer.data, status=200)
 
 
 @csrf_exempt
@@ -73,6 +97,18 @@ def book_author(request, bid):
         authors = Author.objects.filter(books=books)
         serializer = AuthorSerializerBasic(authors, many = True)
         return JsonResponse(serializer.data, safe=False, status=200)
+    elif request.method == 'PUT':
+        data = JSONParser().parse(request)
+        try:
+            book = Book.objects.get(id=bid)
+        except Book.DoesNotExist:
+            return HttpResponse(status=404)
+        book.authors.clear()
+        for author_id in data:
+            book.authors.add(author_id)
+
+        book.save()
+        return HttpResponse(status=201)
 
 
 @csrf_exempt
@@ -87,7 +123,22 @@ def book_shelf(request, bid):
             book.shelves.add(shelf_id)
 
         return HttpResponse(status=200)
-
+    elif request.method == 'GET':
+        books = bid
+        shelves = Shelf.objects.filter(book=books)
+        serializer = ShelfSerializerBasic(shelves, many=True)
+        return JsonResponse(serializer.data, safe=False, status=200)
+    elif request.method == 'PUT':
+        data = JSONParser().parse(request)
+        try:
+            book = Book.objects.get(id=bid)
+        except Book.DoesNotExist:
+            return HttpResponse(status=404)
+        book.shelves.clear()
+        for shelf_id in data:
+            book.shelves.add(shelf_id)
+        book.save()
+        return HttpResponse(status=201)
 
 @csrf_exempt
 def shelf_book(request, username, sid):
@@ -102,8 +153,76 @@ def shelf_book(request, username, sid):
 @csrf_exempt
 def all_books(request):
     if request.method == 'GET':
-        books = Book.objects.filter(private=False)
+        books = Book.objects.filter(private=False, lent=False)
 
         serializer = BookSerializer(books, many=True)
         return JsonResponse(serializer.data, safe=False, status=200)
 
+
+@csrf_exempt
+def book_rating(request, bid):
+    if request.method == 'GET':
+        try:
+            book = Book.objects.get(id=bid)
+        except Book.DoesNotExist:
+            return HttpResponse(status=404)
+
+        avg_rating = 0
+        if book.review_set.count() > 0:
+            for review in book.review_set.all():
+                avg_rating += review.rating
+
+            avg_rating = avg_rating / book.review_set.count()
+
+        return HttpResponse(avg_rating)
+
+
+@csrf_exempt
+def book_lend(request, bid, username):
+    if request.method == 'PUT':
+        try:
+            book = Book.objects.get(id=bid)
+        except Book.DoesNotExist:
+            return HttpResponse(status=404)
+
+        try:
+            user = AppUser.objects.get(username=username)
+        except AppUser.DoesNotExist:
+            return HttpResponse(status=404)
+
+        book.lent = True
+        book.lent_to_id = user.id
+        book.save()
+        serializer = BookSerializer(book)
+        return JsonResponse(serializer.data, status=200)
+
+
+
+@csrf_exempt
+def all_lent_books(request, username):
+    if request.method == 'GET':
+        try:
+            user = AppUser.objects.get(username=username)
+        except AppUser.DoesNotExist:
+            return HttpResponse(status=404)
+
+        books = Book.objects.filter(lent_to_id=user.id)
+
+        serializer = BookSerializer(books, many=True)
+        return JsonResponse(serializer.data, safe=False, status=200)
+
+
+@csrf_exempt
+def return_book(request, bid):
+    if request.method == 'PUT':
+        try:
+            book = Book.objects.get(id=bid)
+        except Book.DoesNotExist:
+            return HttpResponse(status=404)
+
+        book.lent_to_id = None
+        book.lent = False
+
+        book.save()
+
+        return HttpResponse(status=200)
